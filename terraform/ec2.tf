@@ -71,6 +71,7 @@ resource "aws_security_group" "app" {
 resource "aws_instance" "web" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = "t3.micro"
+  key_name               = "soc-3tier-key"
   subnet_id              = aws_subnet.web.id
   vpc_security_group_ids = [aws_security_group.web.id]
 
@@ -83,6 +84,7 @@ resource "aws_instance" "web" {
 resource "aws_instance" "app" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = "t3.micro"
+  key_name               = "soc-3tier-key"
   subnet_id              = aws_subnet.app.id
   vpc_security_group_ids = [aws_security_group.app.id]
 
@@ -120,6 +122,7 @@ resource "aws_security_group" "db" {
 resource "aws_instance" "db" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = "t3.micro"
+  key_name               = "soc-3tier-key"
   subnet_id              = aws_subnet.db.id
   vpc_security_group_ids = [aws_security_group.db.id]
 
