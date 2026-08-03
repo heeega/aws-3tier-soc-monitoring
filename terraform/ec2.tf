@@ -90,3 +90,40 @@ resource "aws_instance" "app" {
     Name = "app-tier-ec2"
   }
 }
+
+# DB Tier Security Group (App Tier로부터 3306만 허용)
+resource "aws_security_group" "db" {
+  name   = "db-tier-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description     = "MySQL from App tier only"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "db-tier-sg"
+  }
+}
+
+# DB Tier EC2 (MySQL 직접 설치 예정)
+resource "aws_instance" "db" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.db.id
+  vpc_security_group_ids = [aws_security_group.db.id]
+
+  tags = {
+    Name = "db-tier-ec2"
+  }
+}
