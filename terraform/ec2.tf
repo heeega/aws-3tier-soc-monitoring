@@ -1,0 +1,92 @@
+# 최신 Amazon Linux 2023 AMI 조회
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+}
+
+# Web Tier Security Group (외부 -> Web: 80,443 / 관리자 -> Web: 22)
+resource "aws_security_group" "web" {
+  name   = "web-tier-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description = "HTTP from internet"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH from my IP only"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # TODO: 본인 IP로 제한 예정
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "web-tier-sg"
+  }
+}
+
+# App Tier Security Group (Web -> App: 8080만 허용)
+resource "aws_security_group" "app" {
+  name   = "app-tier-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description     = "App port from Web tier only"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "app-tier-sg"
+  }
+}
+
+# Web Tier EC2
+resource "aws_instance" "web" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.web.id
+  vpc_security_group_ids = [aws_security_group.web.id]
+
+  tags = {
+    Name = "web-tier-ec2"
+  }
+}
+
+# App Tier EC2
+resource "aws_instance" "app" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.app.id
+  vpc_security_group_ids = [aws_security_group.app.id]
+
+  tags = {
+    Name = "app-tier-ec2"
+  }
+}
