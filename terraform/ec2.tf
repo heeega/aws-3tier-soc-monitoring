@@ -42,7 +42,7 @@ resource "aws_security_group" "web" {
   }
 }
 
-# App Tier Security Group (Web -> App: 8080만 허용)
+# App Tier Security Group (Web -> App: 8080, Web -> App: 22(Bastion SSH))
 resource "aws_security_group" "app" {
   name   = "app-tier-sg"
   vpc_id = aws_vpc.main.id
@@ -51,6 +51,14 @@ resource "aws_security_group" "app" {
     description     = "App port from Web tier only"
     from_port       = 8080
     to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web.id]
+  }
+
+  ingress {
+    description     = "SSH from Web tier (bastion) only"
+    from_port       = 22
+    to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.web.id]
   }
@@ -93,7 +101,7 @@ resource "aws_instance" "app" {
   }
 }
 
-# DB Tier Security Group (App Tier로부터 3306만 허용)
+# DB Tier Security Group (App Tier로부터 3306, App Tier로부터 22(Bastion SSH))
 resource "aws_security_group" "db" {
   name   = "db-tier-sg"
   vpc_id = aws_vpc.main.id
@@ -102,6 +110,14 @@ resource "aws_security_group" "db" {
     description     = "MySQL from App tier only"
     from_port       = 3306
     to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
+  }
+
+  ingress {
+    description     = "SSH from App tier (bastion) only"
+    from_port       = 22
+    to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.app.id]
   }
