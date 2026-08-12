@@ -55,7 +55,7 @@ resource "aws_security_group" "was" {
   }
 
   ingress {
-    description     = "SSH from Web tier (bastion 경유 시)"
+    description     = "SSH from Web tier (bastion)"
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
