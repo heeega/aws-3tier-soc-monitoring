@@ -1,10 +1,26 @@
 # ---------- Web Server (Amazon Linux 2023, Public Subnet) ----------
 resource "aws_instance" "web" {
-  ami                     = "ami-06882388850fd4a12" # Amazon Linux 2023 (ap-northeast-2)
+  ami                     = "ami-06882388850fd4a12"
   instance_type           = "t3.micro"
   subnet_id               = aws_subnet.public_a.id
   vpc_security_group_ids  = [aws_security_group.web.id]
   key_name                = "soc-3tier-key"
+
+  user_data = <<-EOF
+              #!/bin/bash
+              dnf update -y
+              dnf install -y httpd
+              systemctl enable httpd
+
+              # Harden: disable TRACE method (XST 방지)
+              echo "TraceEnable off" >> /etc/httpd/conf/httpd.conf
+
+              # Harden: add clickjacking protection header
+              echo "Header always append X-Frame-Options SAMEORIGIN" >> /etc/httpd/conf/httpd.conf
+
+              systemctl start httpd
+              echo "<h1>SOC 3-tier Toy Project - Web Tier</h1>" > /var/www/html/index.html
+              EOF
 
   tags = {
     Name = "${var.project_name}-web"
