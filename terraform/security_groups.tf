@@ -99,3 +99,28 @@ resource "aws_security_group" "db" {
     Name = "${var.project_name}-db-sg"
   }
 }
+
+resource "aws_security_group" "attacker" {
+  name        = "${var.project_name}-attacker-sg"
+  description = "Attacker EC2 for nmap/nikto simulation, SSH from admin IPs only"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "SSH from admin IPs only"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.admin_ips
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-attacker-sg"
+  }
+}

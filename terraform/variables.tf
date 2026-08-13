@@ -15,5 +15,6 @@ variable "admin_ips" {
   type        = list(string)
   default = [
     "222.233.151.194/32",  # NewSchool
+    "211.178.91.6/32",     # 집
   ]
 }
