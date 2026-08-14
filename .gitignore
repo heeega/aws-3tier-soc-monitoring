@@ -45,4 +45,4 @@ terraform.rc
 
 # SSH Key Pair
 *.pem
-*.ppk
+*.ppklambda/*.zip

@@ -18,3 +18,8 @@ variable "admin_ips" {
     "211.178.91.6/32",     # 집
   ]
 }
+
+variable "alert_email" {
+  description = "보안 알림을 받을 이메일 주소"
+  type        = string
+}
