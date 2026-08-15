@@ -24,8 +24,8 @@ resource "aws_iam_role" "github_actions" {
           }
           StringLike = {
             "token.actions.githubusercontent.com:sub" = [
-              "repo:heeega/aws-3tier-soc-monitoring:pull_request",
-              "repo:heeega/aws-3tier-soc-monitoring:ref:refs/heads/*"
+            "repo:heeega/aws-3tier-soc-monitoring:*",
+            "repo:heeega@*/aws-3tier-soc-monitoring@*:*"
             ]
           }
         }
