@@ -11,6 +11,14 @@ terraform {
       version = "~> 2.4"
     }
   }
+
+  backend "s3" {
+    bucket       = "soc-3tier-tfstate-374186048514"
+    key          = "terraform.tfstate"
+    region       = "ap-northeast-2"
+    use_lockfile = true
+    encrypt      = true
+  }
 }
 
 provider "aws" {
