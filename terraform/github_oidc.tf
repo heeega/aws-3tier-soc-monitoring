@@ -23,7 +23,10 @@ resource "aws_iam_role" "github_actions" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:heeega/aws-3tier-soc-monitoring:*"
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:heeega/aws-3tier-soc-monitoring:pull_request",
+              "repo:heeega/aws-3tier-soc-monitoring:ref:refs/heads/*"
+            ]
           }
         }
       }
