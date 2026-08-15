@@ -7,3 +7,8 @@ output "attacker_public_ip" {
   description = "공격자 EC2 Public IP"
   value       = aws_instance.attacker.public_ip
 }
+
+output "github_actions_role_arn" {
+  description = "GitHub Actions가 assume할 IAM Role ARN"
+  value       = aws_iam_role.github_actions.arn
+}

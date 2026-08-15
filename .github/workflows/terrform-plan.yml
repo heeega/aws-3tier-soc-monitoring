@@ -1,0 +1,80 @@
+name: Terraform Plan
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'terraform/**'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Debug OIDC Token
+        run: |
+          curl -sSL "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" | jq -r '.value' | cut -d. -f2 | base64 -d 2>/dev/null | jq
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.8"
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
+        env:
+          TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
+
+      - name: Comment PR with Plan Result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `#### Terraform Format: \`${{ steps.fmt.outcome }}\`
+            #### Terraform Validate: \`${{ steps.validate.outcome }}\`
+            #### Terraform Plan: \`${{ steps.plan.outcome }}\`
+
+            <details><summary>Plan 상세 결과 보기</summary>
+
+            \`\`\`
+            ${{ steps.plan.outputs.stdout }}
+            \`\`\`
+
+            </details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
