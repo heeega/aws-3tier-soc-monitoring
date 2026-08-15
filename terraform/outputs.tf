@@ -12,3 +12,4 @@ output "github_actions_role_arn" {
   description = "GitHub Actions가 assume할 IAM Role ARN"
   value       = aws_iam_role.github_actions.arn
 }
+# CI/CD 파이프라인 테스트용 주석
