@@ -46,3 +46,4 @@ terraform.rc
 # SSH Key Pair
 *.pem
 *.ppklambda/*.zip
+lambda/*.zip

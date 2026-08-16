@@ -153,3 +153,61 @@ resource "aws_security_group" "alb" {
     Name = "${var.project_name}-alb-sg"
   }
 }
+
+resource "aws_security_group" "elk_v2" {
+  name_prefix = "${var.project_name}-elk-sg-v2-"
+  description = "ELK stack - SSH and Kibana from Web tier (bastion) only, Elasticsearch from log shipper Lambda"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "SSH from Web tier (bastion)"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web.id]
+  }
+
+  ingress {
+    description     = "Kibana from Web tier (bastion)"
+    from_port       = 5601
+    to_port         = 5601
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web.id]
+  }
+
+  ingress {
+    description     = "Elasticsearch from log shipper Lambda"
+    from_port       = 9200
+    to_port         = 9200
+    protocol        = "tcp"
+    security_groups = [aws_security_group.log_shipper_lambda.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-elk-sg"
+  }
+}
+
+resource "aws_security_group" "log_shipper_lambda" {
+  name_prefix = "${var.project_name}-log-shipper-lambda-sg-"
+  description = "Lambda for shipping logs to Elasticsearch"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-log-shipper-lambda-sg"
+  }
+}
