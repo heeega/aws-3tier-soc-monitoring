@@ -6,6 +6,11 @@ resource "aws_instance" "attacker" {
   vpc_security_group_ids  = [aws_security_group.attacker.id]
   key_name                = "soc-3tier-key"
 
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
+
   user_data = <<-EOF
               #!/bin/bash
               apt-get update -y

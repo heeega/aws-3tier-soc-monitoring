@@ -9,7 +9,7 @@ resource "aws_launch_template" "web" {
   user_data = base64encode(<<-EOF
 #!/bin/bash
 dnf update -y
-dnf install -y httpd
+dnf install -y httpd php
 systemctl enable httpd
 
 # Harden: disable TRACE method (XST 방지)
@@ -23,6 +23,21 @@ systemctl start httpd
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
 echo "<h1>SOC 3-tier Toy Project - Web Tier</h1><p>Instance ID: $INSTANCE_ID</p>" > /var/www/html/index.html
+
+cat > /var/www/html/search.php << 'PHPEOF'
+<?php
+$query = isset($_GET['q']) ? $_GET['q'] : '';
+echo "<h2>검색 결과: " . $query . "</h2>";
+$sql = "SELECT * FROM products WHERE name = '" . $query . "'";
+echo "<p>실행된 쿼리(데모용): " . htmlspecialchars($sql) . "</p>";
+?>
+<form method="get">
+  <input type="text" name="q" placeholder="검색어 입력">
+  <button type="submit">검색</button>
+</form>
+PHPEOF
+
+systemctl restart httpd
 EOF
   )
 
