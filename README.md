@@ -4,10 +4,11 @@
 
 **AWS 3-Tier 인프라 기반 클라우드 보안관제 파이프라인 구축 프로젝트**
 
-
+<br>
 
 📝 **[전체 진행 과정, 이 블로그에서 매일 기록하고 있습니다](https://dev-heega.tistory.com/)**
 
+<br>
 
 
 [![Terraform](https://img.shields.io/badge/Terraform-1.15-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io/)
