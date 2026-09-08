@@ -47,3 +47,4 @@ terraform.rc
 *.pem
 *.ppklambda/*.zip
 lambda/*.zip
+terraform/temp_log.json

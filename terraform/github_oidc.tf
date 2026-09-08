@@ -8,6 +8,8 @@ resource "aws_iam_openid_connect_provider" "github" {
 # ---------- GitHub Actions가 위임받을 IAM Role ----------
 resource "aws_iam_role" "github_actions" {
   name = "${var.project_name}-github-actions-role"
+  # AWS 허용 범위(1~12시간) 중 최소 권한 원칙에 따라 가장 짧은 값 선택
+  max_session_duration = 3600
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
